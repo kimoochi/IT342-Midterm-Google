@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Contacts</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Google Contacts Manager</h1>
+
+    <!-- Contact List -->
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="contact : ${contacts}">
+            <td th:text="${contact.firstName} + ' ' + ${contact.lastName} ?: 'No Name'"></td>
+            <td th:text="${contact.email} ?: 'No Email'"></td>
+            <td th:text="${contact.phoneNumber} ?: 'No Phone'"></td>
+            <td>
+                <a th:href="@{/contacts/edit/{id}(id=${contact.resourceName.replace('/', '_')})}" class="button edit-btn">Edit</a>
+                <a th:href="@{/contacts/delete/{id}(id=${contact.resourceName.replace('/', '_')})}" class="button delete-btn">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Add Contact Form -->
+    <div class="form-container">
+        <h2>Add New Contact</h2>
+        <form th:action="@{/contacts/add}" th:object="${newContact}" method="post">
+            <input type="text" th:field="*{firstName}" placeholder="First Name" required>
+            <input type="text" th:field="*{lastName}" placeholder="Last Name">
+            <input type="text" th:field="*{email}" placeholder="Email" required>
+            <input type="text" th:field="*{phoneNumber}" placeholder="Phone" required>
+            <button type="submit">Add Contact</button>
+        </form>
+    </div>
+
+    <a href="/logout">Logout</a>
+</div>
+</body>
+</html>

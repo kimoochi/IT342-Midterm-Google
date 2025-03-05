@@ -2,6 +2,8 @@ package com.Yu.midterm.Controller;
 
 import com.Yu.midterm.Model.Contact;
 import com.Yu.midterm.Service.GooglePeopleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -13,7 +15,7 @@ import java.security.GeneralSecurityException;
 
 @Controller
 public class GoogleController {
-
+    private static final Logger logger = LoggerFactory.getLogger(GoogleController.class);
     private final GooglePeopleService contactsService;
 
     public GoogleController(GooglePeopleService contactsService) {
@@ -41,14 +43,11 @@ public class GoogleController {
         String formattedResourceName = resourceName.replace("_", "/");
         Contact contact = contactsService.getContact(userId, formattedResourceName);
         if (contact == null || contact.getResourceName() == null) {
-            System.out.println("Error: Contact not found or invalid for resourceName: " + formattedResourceName + ". Redirecting to /contacts.");
+            logger.warn("Contact not found for resourceName: {}", formattedResourceName);
             contact = new Contact();
             contact.setResourceName(formattedResourceName);
         }
-        System.out.println("Edit Form - Contact: firstName=" + contact.getFirstName() + ", lastName=" + contact.getLastName() +
-                ", email=" + contact.getEmail() + ", phoneNumber=" + contact.getPhoneNumber() + ", resourceName=" + contact.getResourceName());
         model.addAttribute("contact", contact);
-        model.addAttribute("resourceName", formattedResourceName);
         return "edit-contact";
     }
 
@@ -59,14 +58,7 @@ public class GoogleController {
         if (contact.getResourceName() == null) {
             contact.setResourceName(formattedResourceName);
         }
-        try {
-            Contact updatedContact = contactsService.updateContact(userId, formattedResourceName, contact);
-            System.out.println("Update successful - Updated Contact: firstName=" + updatedContact.getFirstName() + ", lastName=" + updatedContact.getLastName() +
-                    ", email=" + updatedContact.getEmail() + ", phoneNumber=" + updatedContact.getPhoneNumber());
-        } catch (Exception e) {
-            System.out.println("Update failed: " + e.getMessage());
-            return "redirect:/contacts?error=updateFailed";
-        }
+        contactsService.updateContact(userId, formattedResourceName, contact);
         return "redirect:/contacts";
     }
 
